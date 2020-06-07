@@ -1,0 +1,128 @@
+---
+title: "Course Project 1"
+author: "Omar Alfaro-Rivera"
+date: "30/5/2020"
+output: html_document
+---
+
+## Loading and preprocessing the data
+
+```{r setup, echo=TRUE}
+basedata = read.csv("activity.csv")
+library(dplyr)
+library(ggplot2)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars, echo=TRUE}
+newbase = basedata %>%
+  group_by(date)%>%
+  summarise(stepsbydate = sum(steps))
+```
+
+## What is mean total number of steps taken per day?
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+ggplot(newbase, aes(stepsbydate))+
+  geom_histogram(aes(y=..density..))+
+  geom_density(col="red")
+```
+
+
+
+```{r, echo=TRUE}
+summary(newbase$stepsbydate)
+```
+
+## What is the average daily activity pattern? 
+
+```{r}
+MeanSteps = basedata  %>%
+  filter(is.na(steps) == FALSE)%>%
+  group_by(interval)%>%
+  summarise(Mean = mean(steps))
+
+ggplot(MeanSteps, aes(x=interval, y=Mean))+
+  geom_line()
+
+```
+
+
+
+
+
+```{r}
+head(arrange(MeanSteps, desc(Mean)), n=20)
+
+```
+
+
+
+## Imputing missing values
+
+
+### Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with \color{red}{\verb|NA|}NAs)
+
+```{r}
+table(is.na(basedata$steps))
+```
+
+
+### Devise a strategy for filling in all of the missing values in the dataset
+
+```{r}
+basedataNA = basedata %>%
+  group_by(interval)%>%
+  mutate(newsteps = mean(steps, na.rm=TRUE))
+
+for (i in 1:length(basedataNA$newsteps)) {
+  if (is.na(basedataNA$steps[i])==TRUE) {
+    basedataNA$steps[i] <- basedataNA$newsteps[i]
+  }
+  
+}
+
+```
+
+
+
+### Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. 
+
+```{r}
+newbaseNA = basedataNA %>%
+  group_by(date)%>%
+  summarise(stepsbydate = sum(steps))
+
+ggplot(newbaseNA, aes(stepsbydate))+
+  geom_histogram(aes(y=..density..))+
+  geom_density(col="red")
+
+
+summary(newbaseNA$stepsbydate)
+```
+
+
+### Are there differences in activity patterns between weekdays and weekends?
+
+```{r}
+basedata$date <- as.Date(basedata$date)
+basedata$DoW <- weekdays(basedata$date)
+basedata$WeekEnd = "No"
+basedata$WeekEnd[basedata$DoW == "sábado" | basedata$DoW=="domingo"] = "Yes"
+
+MeanStepsNA = basedata  %>%
+  filter(is.na(steps) == FALSE)%>%
+  group_by(interval, WeekEnd)%>%
+  summarise(Mean = mean(steps))
+
+ggplot(MeanStepsNA, aes(x=interval, y=Mean))+
+  geom_line(aes(col=WeekEnd))
+
+```
