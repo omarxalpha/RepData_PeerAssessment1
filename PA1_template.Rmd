@@ -11,7 +11,7 @@ Thisassignment is a brief analysis of the steps performed by an individual over 
 
 ## Loading and preprocessing the data
 
-```{r setup, echo=TRUE,message=FALSE}
+```{r , echo=TRUE,message=FALSE}
 #Read the data & call libraries
 if(!file.exists("activity.csv")){
 unzip("activity.zip")  
@@ -23,7 +23,7 @@ library(ggplot2)
 ```
 
 
-```{r cars, echo=TRUE}
+```{r, echo=TRUE}
 # Data transformation, total steps by date
 newbase = basedata %>%
   group_by(date)%>%
